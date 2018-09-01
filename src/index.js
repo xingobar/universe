@@ -8,6 +8,7 @@ var controls; // 控制元件
 var light; // 燈光
 var sun_mesh; // 太陽
 var moon_mesh; //月亮
+var cloud_mesh; // 雲朵
 
 function init() {
 	scene = new THREE.Scene(); //建立場景
@@ -21,7 +22,7 @@ function init() {
 
 	// 設定軌道運行控制
 	controls = new THREE.OrbitControls(camera);
-	controls.autoRotate = true;
+	controls.autoRotate = false;
 	controls.autoRotateSpeed = 3.0;
 	controls.update();
 
@@ -48,7 +49,7 @@ function init() {
 			/**
 			 * 增加雲朵
 			 */
-			var cloud_geometry = new THREE.SphereGeometry(2, 64, 64);
+			var cloud_geometry = new THREE.SphereGeometry(2, 150, 150);
 			var cloud_material = new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load('/universe/static/img/earthcloudmap.jpg'),
 				side: THREE.DoubleSide,
@@ -56,7 +57,7 @@ function init() {
 				transparent: true,
 				depthWrite: false
 			});
-			var cloud_mesh = new THREE.Mesh(cloud_geometry, cloud_material);
+			cloud_mesh = new THREE.Mesh(cloud_geometry, cloud_material);
 
 			/**
 			 * 球體設置
@@ -75,7 +76,8 @@ function init() {
 			var star_geometry = new THREE.SphereGeometry(10, 64, 64);
 			var star_material = new THREE.MeshBasicMaterial({
 				map: new THREE.TextureLoader().load('/universe/static/img/StarsMap.jpg'),
-				side: THREE.BackSide
+				side: THREE.BackSide,
+				shininess: 0
 			});
 			var star_mesh = new THREE.Mesh(star_geometry, star_material);
 			scene.add(star_mesh); // 將星空加入場景
@@ -84,7 +86,7 @@ function init() {
 			 * meshPhongMaterial 要加入燈光，否則會顯示不出來
 			 */
 			light = new THREE.DirectionalLight(0xffffff);
-			light.position.set(1, 1, 1).normalize();
+			light.position.set(0, 1, 1).normalize();
 			scene.add(light); // 加入燈光
 		},
 		undefined, // onPress callback
@@ -123,7 +125,7 @@ function init() {
 
 			var moon_geometry = new THREE.SphereGeometry(2, 64, 64);
 			moon_mesh = new THREE.Mesh(moon_geometry, moon_material);
-			moon_mesh.position.set(11, 0, -2);
+			moon_mesh.position.set(11, -1, -1);
 			scene.add(moon_mesh);
 		},
 		undefined,
@@ -133,22 +135,55 @@ function init() {
 	);
 
 	camera.position.z = 7;
+	window.addEventListener('resize', onWindowResize, false);
 }
+
+function onWindowResize() {
+	camera.aspect = window.innerWidth / window.innerHeight;
+	camera.updateProjectionMatrix(); // update camera
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	controls.handleResize();
+}
+
+let moon_r = 8;
+let moon_theta = 0;
+let moon_dtheta = 2 * Math.PI / 700;
+let earth_r = 5;
+let earth_theta = 0;
+let earth_dtheta = 2 * Math.PI / 1000;
 
 var animate = function() {
 	requestAnimationFrame(animate);
 
-	if (earth_mesh) {
-		earth_mesh.rotation.y += 0.01;
-	}
-
 	if (sun_mesh) {
 		sun_mesh.rotation.y += 0.01;
-		light.position.copy(camera.getWorldPosition());
+	}
+
+	if (light) {
+		light.position.copy(camera.getWorldPosition(new THREE.Vector3()));
+	}
+
+	if (cloud_mesh) {
+		cloud_mesh.rotation.y += 0.01;
+	}
+
+	moon_theta += moon_dtheta;
+	earth_theta += earth_dtheta;
+
+	if (earth_mesh) {
+		earth_mesh.rotation.y += 0.01;
+		earth_mesh.position.x = -earth_r * Math.cos(earth_theta);
+		earth_mesh.position.z = -earth_r * Math.sin(earth_theta);
+	}
+
+	if (moon_mesh) {
+		moon_mesh.position.x = -moon_r * Math.cos(moon_theta);
+		moon_mesh.position.z = -moon_r * Math.sin(moon_theta);
 	}
 
 	controls.update();
 	renderer.render(scene, camera);
 };
+
 init();
 animate();
