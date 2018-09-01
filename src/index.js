@@ -36,11 +36,11 @@ function init() {
 			/**
 			 * 增加雲朵
 			 */
-			var cloud_geometry = new THREE.SphereGeometry(2.5, 64, 64);
+			var cloud_geometry = new THREE.SphereGeometry(2, 64, 64);
 			var cloud_material = new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load('/universe/static/img/earthcloudmap.jpg'),
 				side: THREE.DoubleSide,
-				opacity: 0.8,
+				opacity: 0.45,
 				transparent: true,
 				depthWrite: false
 			});
@@ -49,13 +49,24 @@ function init() {
 			/**
 			 * 球體設置
 			 */
-			earth_geometry = new THREE.SphereGeometry(2.5, 64, 64); // radius, widthFragment, heightFragment
+			earth_geometry = new THREE.SphereGeometry(2, 64, 64); // radius, widthFragment, heightFragment
 			earth_mesh = new THREE.Mesh(earth_geometry, earth_material); // 建立物件
 			earth_mesh.position.set(0, 0, 0); // x,y,z
 
 			earth_mesh.add(cloud_mesh);
 
 			scene.add(earth_mesh); // 將地球加入場景
+
+			/**
+			 * 加入星空
+			 */
+			var star_geometry = new THREE.SphereGeometry(200, 64, 64);
+			var star_material = new THREE.MeshBasicMaterial({
+				map: new THREE.TextureLoader().load('/universe/static/img/galaxy_starfield.png'),
+				side: THREE.BackSide
+			});
+			var star_mesh = new THREE.Mesh(star_geometry, star_material);
+			scene.add(star_mesh); // 將星空加入場景
 
 			/**
 			 * meshPhongMaterial 要加入燈光，否則會顯示不出來
