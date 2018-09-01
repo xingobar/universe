@@ -7,20 +7,22 @@ var earth_mesh; // 地球
 var controls; // 控制元件
 var light; // 燈光
 var sun_mesh; // 太陽
+var moon_mesh; //月亮
 
 function init() {
 	scene = new THREE.Scene(); //建立場景
-	camera = new THREE.PerspectiveCamera(140, window.innerWidth / window.innerHeight, 0.1, 1000); // fov , aspect, near ,far
+	camera = new THREE.PerspectiveCamera(150, window.innerWidth / window.innerHeight, 0.1, 1000); // fov , aspect, near ,far
 	renderer = new THREE.WebGLRenderer({ alpha: true });
 	renderer.setSize(window.innerWidth, window.innerHeight); // 設定場景大小
 	scene.background = new THREE.Color(0xffffff); // 設定場景背景色
 	document.body.appendChild(renderer.domElement);
 
-	camera.position.set(0, 3, 0); // 設定相機位置
+	camera.position.set(0, 7, 0); // 設定相機位置 x,y,z
 
 	// 設定軌道運行控制
 	controls = new THREE.OrbitControls(camera);
 	controls.autoRotate = true;
+	controls.autoRotateSpeed = 3.0;
 	controls.update();
 
 	var loader = new THREE.TextureLoader();
@@ -61,7 +63,7 @@ function init() {
 			 */
 			earth_geometry = new THREE.SphereGeometry(2, 64, 64); // radius, widthFragment, heightFragment
 			earth_mesh = new THREE.Mesh(earth_geometry, earth_material); // 建立物件
-			earth_mesh.position.set(5, 0, 0); // x,y,z
+			earth_mesh.position.set(5, 0, -1); // x,y,z
 
 			earth_mesh.add(cloud_mesh);
 
@@ -93,18 +95,44 @@ function init() {
 	);
 
 	// 增加太陽
-	loader.load('/universe/static/img/sun.jpg', function(texture) {
-		var sun_material = new THREE.MeshPhongMaterial({
-			map: texture
-		});
+	loader.load(
+		'/universe/static/img/sun.jpg',
+		function(texture) {
+			var sun_material = new THREE.MeshPhongMaterial({
+				map: texture
+			});
 
-		var sun_geometry = new THREE.SphereGeometry(2, 64, 64);
-		sun_mesh = new THREE.Mesh(sun_geometry, sun_material);
-		sun_mesh.position.set(0, 0, 0);
-		scene.add(sun_mesh);
-	});
+			var sun_geometry = new THREE.SphereGeometry(2, 64, 64);
+			sun_mesh = new THREE.Mesh(sun_geometry, sun_material);
+			sun_mesh.position.set(0, 0, 0);
+			scene.add(sun_mesh);
+		},
+		undefined,
+		function(err) {
+			console.log('load sun image err', err);
+		}
+	);
 
-	camera.position.z = 5;
+	//增加月亮
+	loader.load(
+		'/universe/static/img/moon.jpg',
+		function(texture) {
+			var moon_material = new THREE.MeshPhongMaterial({
+				map: texture
+			});
+
+			var moon_geometry = new THREE.SphereGeometry(2, 64, 64);
+			moon_mesh = new THREE.Mesh(moon_geometry, moon_material);
+			moon_mesh.position.set(11, 0, -2);
+			scene.add(moon_mesh);
+		},
+		undefined,
+		function(err) {
+			console.log('load moon image err', err);
+		}
+	);
+
+	camera.position.z = 7;
 }
 
 var animate = function() {
