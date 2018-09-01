@@ -67,7 +67,6 @@ function init() {
 			});
 			var star_mesh = new THREE.Mesh(star_geometry, star_material);
 			scene.add(star_mesh); // 將星空加入場景
-
 			/**
 			 * meshPhongMaterial 要加入燈光，否則會顯示不出來
 			 */
