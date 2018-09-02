@@ -9,6 +9,7 @@ var light; // 燈光
 var sun_mesh; // 太陽
 var moon_mesh; //月亮
 var cloud_mesh; // 雲朵
+var mercury_mesh; // 水星
 
 function init() {
 	scene = new THREE.Scene(); //建立場景
@@ -32,23 +33,17 @@ function init() {
 		function(texture) {
 			// callback
 
-			/**
-			 * 光亮材質
-			 */
+			//光亮材質
 			var earth_material = new THREE.MeshPhongMaterial({
 				// 網格材質
 				map: texture
 			});
 
-			/**
-			 * 增加表面高度
-			 */
+			//增加表面高度
 			earth_material.bumpMap = new THREE.TextureLoader().load('/universe/static/img/4096_bump.jpg');
 			earth_material.bumpScale = 0.05; // bump 影響 material的程度
 
-			/**
-			 * 增加雲朵
-			 */
+			//增加雲朵
 			var cloud_geometry = new THREE.SphereGeometry(2, 150, 150);
 			var cloud_material = new THREE.MeshPhongMaterial({
 				map: new THREE.TextureLoader().load('/universe/static/img/earthcloudmap.jpg'),
@@ -59,21 +54,17 @@ function init() {
 			});
 			cloud_mesh = new THREE.Mesh(cloud_geometry, cloud_material);
 
-			/**
-			 * 球體設置
-			 */
+			//球體設置
 			earth_geometry = new THREE.SphereGeometry(2, 64, 64); // radius, widthFragment, heightFragment
 			earth_mesh = new THREE.Mesh(earth_geometry, earth_material); // 建立物件
-			earth_mesh.position.set(5, 0, -1); // x,y,z
+			earth_mesh.position.set(10, 0, -1); // x,y,z
 
 			earth_mesh.add(cloud_mesh);
 
 			scene.add(earth_mesh); //將地球加入場景;
 
-			/**
-			 * 加入星空
-			 */
-			var star_geometry = new THREE.SphereGeometry(10, 64, 64);
+			//加入星空
+			var star_geometry = new THREE.SphereGeometry(15, 64, 64);
 			var star_material = new THREE.MeshBasicMaterial({
 				map: new THREE.TextureLoader().load('/universe/static/img/StarsMap.jpg'),
 				side: THREE.BackSide,
@@ -82,9 +73,7 @@ function init() {
 			var star_mesh = new THREE.Mesh(star_geometry, star_material);
 			scene.add(star_mesh); // 將星空加入場景
 
-			/**
-			 * meshPhongMaterial 要加入燈光，否則會顯示不出來
-			 */
+			// meshPhongMaterial 要加入燈光，否則會顯示不出來
 			light = new THREE.DirectionalLight(0xffffff);
 			light.position.set(0, 1, 1).normalize();
 			scene.add(light); // 加入燈光
@@ -125,12 +114,32 @@ function init() {
 
 			var moon_geometry = new THREE.SphereGeometry(2, 64, 64);
 			moon_mesh = new THREE.Mesh(moon_geometry, moon_material);
-			moon_mesh.position.set(11, -1, -1);
+			moon_mesh.position.set(14, 0, -1);
 			scene.add(moon_mesh);
 		},
 		undefined,
 		function(err) {
 			console.log('load moon image err', err);
+		}
+	);
+
+	// 增加水星
+	loader.load(
+		'/universe/static/img/mercurymap.jpg',
+		function(texture) {
+			var mercury_material = new THREE.MeshPhongMaterial({
+				map: texture
+			});
+			var mercury_geometry = new THREE.SphereGeometry(2, 64, 64);
+			mercury_mesh = new THREE.Mesh(mercury_geometry, mercury_material);
+			mercury_mesh.bumpMap = new THREE.TextureLoader().load('/universe/static/img/mercurybump.jpg');
+			mercury_material.bumpScale = 0.05;
+			mercury_mesh.position.set(4, 0, -1);
+			scene.add(mercury_mesh);
+		},
+		undefined,
+		function(err) {
+			console.log('load mercury image err', err);
 		}
 	);
 
@@ -145,12 +154,17 @@ function onWindowResize() {
 	controls.handleResize();
 }
 
-let moon_r = 8;
+let moon_r = 14;
 let moon_theta = 0;
 let moon_dtheta = 2 * Math.PI / 700;
-let earth_r = 5;
+
+let earth_r = 10;
 let earth_theta = 0;
 let earth_dtheta = 2 * Math.PI / 1000;
+
+let mercury_r = 4;
+let mercury_theta = 0;
+let mercury_dtheta = 2 * Math.PI / 650;
 
 var animate = function() {
 	requestAnimationFrame(animate);
@@ -169,6 +183,7 @@ var animate = function() {
 
 	moon_theta += moon_dtheta;
 	earth_theta += earth_dtheta;
+	mercury_theta += mercury_dtheta;
 
 	if (earth_mesh) {
 		earth_mesh.rotation.y += 0.01;
@@ -179,6 +194,12 @@ var animate = function() {
 	if (moon_mesh) {
 		moon_mesh.position.x = -moon_r * Math.cos(moon_theta);
 		moon_mesh.position.z = -moon_r * Math.sin(moon_theta);
+	}
+
+	if (mercury_mesh) {
+		mercury_mesh.rotation.y += 0.01;
+		mercury_mesh.position.x = -mercury_r * Math.cos(mercury_theta);
+		mercury_mesh.position.z = -mercury_r * Math.sin(mercury_theta);
 	}
 
 	controls.update();
